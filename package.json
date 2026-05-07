@@ -3,11 +3,12 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "eslint"
-  },
+  "dev": "next dev",
+  "build": "next build",
+  "start": "next start",
+  "lint": "next lint",
+  "test": "vitest run"
+},
   "dependencies": {
     "@anthropic-ai/sdk": "^0.95.0",
     "@radix-ui/react-dialog": "^1.1.15",
