@@ -28,3 +28,9 @@ jobs:
 
       - name: Run tests
         run: npm run test
+        env:
+          MONGODB_URI: ${{ secrets.MONGODB_URI }}
+          ANTHROPIC_API_KEY: placeholder
+          GROQ_API_KEY: placeholder
+          RESEND_API_KEY: placeholder
+          NEXT_PUBLIC_BASE_URL: http://localhost:3000
