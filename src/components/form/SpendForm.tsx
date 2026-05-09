@@ -103,6 +103,7 @@ export default function SpendForm() {
     setError("");
 
     try {
+      // Step 1: Create audit
       const res = await fetch("/api/audit", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -110,17 +111,16 @@ export default function SpendForm() {
       });
 
       if (!res.ok) throw new Error("Failed to create audit");
-
       const audit = await res.json();
 
-      // Generate AI summary in background
-      fetch("/api/summary", {
+      // Step 2: Wait for AI summary before redirecting
+      await fetch("/api/summary", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(audit),
       });
 
-      // Clear storage and redirect
+      // Step 3: Now redirect — summary is ready
       localStorage.removeItem(STORAGE_KEY);
       router.push(`/audit/${audit.id}`);
     } catch (err) {

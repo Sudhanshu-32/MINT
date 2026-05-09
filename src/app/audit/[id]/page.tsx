@@ -48,16 +48,25 @@ export default async function AuditPage({
         />
 
         {/* AI Summary */}
-        {a.summary && (
-          <div className="bg-blue-50 border border-blue-200 rounded-xl p-5">
-            <p className="text-xs font-medium text-blue-500 uppercase tracking-wide mb-2">
-              AI Analysis
-            </p>
-            <p className="text-slate-700 text-sm leading-relaxed">
-              {a.summary}
-            </p>
-          </div>
-        )}
+{a.summary ? (
+  <div className="bg-blue-50 border border-blue-200 rounded-xl p-5">
+    <p className="text-xs font-medium text-blue-500 uppercase tracking-wide mb-2">
+      AI Analysis
+    </p>
+    <p className="text-slate-700 text-sm leading-relaxed">
+      {a.summary}
+    </p>
+  </div>
+) : (
+  <div className="bg-blue-50 border border-blue-200 rounded-xl p-5">
+    <p className="text-xs font-medium text-blue-500 uppercase tracking-wide mb-2">
+      AI Analysis
+    </p>
+    <p className="text-slate-400 text-sm italic">
+      Generating your personalized summary...
+    </p>
+  </div>
+)}
 
         {/* Per tool breakdown */}
         <div className="space-y-3">
