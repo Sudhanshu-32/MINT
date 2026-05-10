@@ -30,12 +30,10 @@ const USE_CASES: { value: UseCase; label: string }[] = [
 const STORAGE_KEY = "mint_form_data";
 
 function defaultTool(tool: ToolName): ToolInput {
-  const pricing = PRICING_DATA[tool];
-  const firstPlan = Object.keys(pricing.plans)[0];
   return {
     tool,
-    plan: firstPlan,
-    monthlySpend: pricing.plans[firstPlan].pricePerSeat,
+    plan: "",
+    monthlySpend: 0,
     seats: 1,
   };
 }
@@ -47,8 +45,8 @@ export default function SpendForm() {
 
   const [formData, setFormData] = useState<FormData>({
     tools: [defaultTool("cursor"), defaultTool("claude")],
-    teamSize: 5,
-    useCase: "coding",
+    teamSize: 0,
+    useCase: "" as UseCase,
   });
 
   // Load persisted form state
@@ -56,7 +54,8 @@ export default function SpendForm() {
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved) {
       try {
-        setFormData(JSON.parse(saved));
+        const parsed = JSON.parse(saved);
+        setFormData(parsed);
       } catch {}
     }
   }, []);
@@ -94,8 +93,20 @@ export default function SpendForm() {
       setError("Please add at least one AI tool.");
       return;
     }
+
+    const unselectedPlans = formData.tools.filter((t) => !t.plan);
+    if (unselectedPlans.length > 0) {
+      setError("Please select a plan for all tools.");
+      return;
+    }
+
     if (!formData.teamSize || formData.teamSize < 1) {
       setError("Please enter your team size.");
+      return;
+    }
+
+    if (!formData.useCase) {
+      setError("Please select a primary use case.");
       return;
     }
 
@@ -159,25 +170,38 @@ export default function SpendForm() {
       <div className="bg-slate-50 rounded-xl p-5 space-y-4">
         <h2 className="font-semibold text-slate-700">Your team</h2>
         <div className="grid grid-cols-2 gap-4">
+
+          {/* Team size — fully keyboard editable */}
           <div className="space-y-1">
             <Label className="text-xs text-slate-500">Team size</Label>
             <Input
               type="number"
               min={1}
-              value={formData.teamSize}
-              onChange={(e) =>
+              max={100000}
+              value={formData.teamSize === 0 ? "" : formData.teamSize}
+              onChange={(e) => {
+                const val = e.target.value;
+                const size = val === "" ? 0 : parseInt(val);
                 setFormData((prev) => ({
                   ...prev,
-                  teamSize: parseInt(e.target.value) || 1,
-                }))
-              }
+                  teamSize: isNaN(size) ? 0 : size,
+                }));
+              }}
+              onBlur={(e) => {
+                if (!e.target.value || parseInt(e.target.value) < 1) {
+                  setFormData((prev) => ({ ...prev, teamSize: 1 }));
+                }
+              }}
+              placeholder="e.g. 10"
               className="h-9 bg-white"
             />
           </div>
+
+          {/* Use case — defaults to Select use case */}
           <div className="space-y-1">
             <Label className="text-xs text-slate-500">Primary use case</Label>
             <Select
-              value={formData.useCase}
+              value={formData.useCase || ""}
               onValueChange={(val) =>
                 setFormData((prev) => ({
                   ...prev,
@@ -186,7 +210,7 @@ export default function SpendForm() {
               }
             >
               <SelectTrigger className="h-9 bg-white">
-                <SelectValue />
+                <SelectValue placeholder="Select use case" />
               </SelectTrigger>
               <SelectContent>
                 {USE_CASES.map((uc) => (
@@ -197,6 +221,20 @@ export default function SpendForm() {
               </SelectContent>
             </Select>
           </div>
+        </div>
+
+        {/* Inline warnings */}
+        <div className="space-y-1">
+          {(!formData.teamSize || formData.teamSize < 1) && (
+            <p className="text-xs text-amber-500">
+              ⚠ Please enter your team size
+            </p>
+          )}
+          {!formData.useCase && (
+            <p className="text-xs text-amber-500">
+              ⚠ Please select a use case
+            </p>
+          )}
         </div>
       </div>
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { ToolInput, ToolName } from "@/types";
+import { ToolInput } from "@/types";
 import { PRICING_DATA } from "@/lib/pricingData";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -57,12 +57,20 @@ export default function ToolRow({
 
       {/* Inputs */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-        {/* Plan */}
+
+        {/* Plan dropdown */}
         <div className="space-y-1">
           <Label className="text-xs text-slate-500">Plan</Label>
           <Select
-            value={toolInput.plan}
-            onValueChange={(val) => onChange({ ...toolInput, plan: val })}
+            value={toolInput.plan || ""}
+            onValueChange={(val) =>
+              onChange({
+                ...toolInput,
+                plan: val,
+                monthlySpend:
+                  pricing?.plans[val]?.pricePerSeat * toolInput.seats || 0,
+              })
+            }
           >
             <SelectTrigger className="h-9">
               <SelectValue placeholder="Select plan" />
@@ -80,50 +88,80 @@ export default function ToolRow({
           </Select>
         </div>
 
-        {/* Seats */}
+        {/* Seats — fully keyboard editable */}
         <div className="space-y-1">
           <Label className="text-xs text-slate-500">Seats</Label>
           <Input
             type="number"
             min={1}
-            value={toolInput.seats}
-            onChange={(e) =>
-              onChange({ ...toolInput, seats: parseInt(e.target.value) || 1 })
-            }
+            max={10000}
+            value={toolInput.seats === 0 ? "" : toolInput.seats}
+            onChange={(e) => {
+              const val = e.target.value;
+              const seats = val === "" ? 0 : parseInt(val);
+              const planPrice =
+                pricing?.plans[toolInput.plan]?.pricePerSeat || 0;
+              onChange({
+                ...toolInput,
+                seats: isNaN(seats) ? 1 : seats,
+                monthlySpend: planPrice * (isNaN(seats) ? 1 : seats),
+              });
+            }}
+            onBlur={(e) => {
+              if (!e.target.value || parseInt(e.target.value) < 1) {
+                onChange({ ...toolInput, seats: 1 });
+              }
+            }}
+            placeholder="e.g. 5"
             className="h-9"
           />
         </div>
 
-        {/* Monthly Spend */}
+        {/* Monthly spend — fully keyboard editable */}
         <div className="space-y-1">
           <Label className="text-xs text-slate-500">Monthly spend ($)</Label>
           <Input
             type="number"
             min={0}
-            value={toolInput.monthlySpend}
-            onChange={(e) =>
+            value={toolInput.monthlySpend === 0 ? "" : toolInput.monthlySpend}
+            onChange={(e) => {
+              const val = e.target.value;
+              const spend = val === "" ? 0 : parseFloat(val);
               onChange({
                 ...toolInput,
-                monthlySpend: parseFloat(e.target.value) || 0,
-              })
-            }
+                monthlySpend: isNaN(spend) ? 0 : spend,
+              });
+            }}
+            onBlur={(e) => {
+              if (!e.target.value) {
+                onChange({ ...toolInput, monthlySpend: 0 });
+              }
+            }}
+            placeholder="e.g. 200"
             className="h-9"
           />
         </div>
       </div>
 
       {/* Expected cost hint */}
-      {expectedCost !== null && (
+      {expectedCost !== null && toolInput.plan && (
         <p className="text-xs text-slate-400">
           Expected at list price:{" "}
           <span className="font-medium text-slate-600">
             ${expectedCost}/mo
           </span>{" "}
-          {toolInput.monthlySpend > expectedCost * 1.1 && (
+          {toolInput.monthlySpend > expectedCost * 1.1 && expectedCost > 0 && (
             <span className="text-amber-500 font-medium">
               ⚠ You may be overpaying
             </span>
           )}
+        </p>
+      )}
+
+      {/* Warning if no plan selected */}
+      {!toolInput.plan && (
+        <p className="text-xs text-amber-500">
+          ⚠ Please select a plan to continue
         </p>
       )}
     </div>
