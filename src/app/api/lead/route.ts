@@ -84,7 +84,7 @@ export async function POST(req: NextRequest) {
               : "Good news — your AI tool spend looks well optimized for your team size and use case."
             }
           </p>
-          
+          <a
             href="${auditUrl}"
             style="display: inline-block; background: #059669; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600; margin: 16px 0;"
           >
