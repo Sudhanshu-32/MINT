@@ -15,14 +15,7 @@ export default function Navbar() {
           </span>
         </Link>
         <div className="flex items-center gap-4">
-          <a
-            href="https://credex.rocks"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-sm text-slate-500 hover:text-slate-800 transition-colors"
-          >
-            Powered by Credex
-          </a>
+         
           <Link
             href="/"
             className="text-sm bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg font-medium transition-colors"
